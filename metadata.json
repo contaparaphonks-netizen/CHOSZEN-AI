@@ -1,0 +1,6 @@
+{
+  "name": "Choszen Edit AI",
+  "description": "IA completa de edicao de videos especializada em futebol, recriacao de estilo, marca-dagua, templates e exportacao.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

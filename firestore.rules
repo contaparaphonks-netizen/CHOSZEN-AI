@@ -1,0 +1,175 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidStringList(listVal, maxLen, maxItemLen) {
+      return listVal is list &&
+             listVal.size() <= maxLen &&
+             (listVal.size() == 0 || (listVal[0] is string && listVal[0].size() <= maxItemLen));
+    }
+
+    function isValidTemplate(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             data.style is string && data.style.size() >= 1 && data.style.size() <= 50 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 40 &&
+             data.durationSec is int && data.durationSec >= 1 && data.durationSec <= 600 &&
+             data.suggestedMusic is string && data.suggestedMusic.size() >= 1 && data.suggestedMusic.size() <= 100 &&
+             isValidStringList(data.transitions, 10, 60) &&
+             isValidStringList(data.effects, 12, 60) &&
+             data.aspectRatio in ['9:16', '1:1', '16:9'] &&
+             data.contrast is number && data.contrast >= -1.0 && data.contrast <= 1.0 &&
+             data.saturation is number && data.saturation >= -1.0 && data.saturation <= 1.0 &&
+             data.brightness is number && data.brightness >= -1.0 && data.brightness <= 1.0 &&
+             data.speedMultiplier is number && data.speedMultiplier >= 0.25 && data.speedMultiplier <= 4.0 &&
+             data.watermarkText is string && data.watermarkText.size() <= 50;
+    }
+
+    function isValidProject(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 100 &&
+             data.subject is string && data.subject.size() <= 80 &&
+             data.style is string && data.style.size() >= 1 && data.style.size() <= 50 &&
+             data.prompt is string && data.prompt.size() <= 1000 &&
+             data.aspectRatio in ['9:16', '1:1', '16:9'] &&
+             data.qualityPreset in ['HD', 'Full HD', '2K', '4K'] &&
+             data.aiSummary is string && data.aiSummary.size() <= 3000 &&
+             data.watermarkText is string && data.watermarkText.size() <= 50;
+    }
+
+    function isValidTicket(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.subject is string && data.subject.size() >= 3 && data.subject.size() <= 120 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 40 &&
+             data.priority in ['baixa', 'media', 'alta'] &&
+             data.description is string && data.description.size() >= 5 && data.description.size() <= 2000 &&
+             data.status in ['aberto', 'em_analise', 'resolvido'];
+    }
+
+    match /users/{userId}/templates/{templateId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(templateId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(templateId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'name', 'style', 'category', 'durationSec', 'suggestedMusic',
+                         'transitions', 'effects', 'aspectRatio', 'contrast', 'saturation',
+                         'brightness', 'speedMultiplier', 'watermarkText', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'name', 'style', 'category', 'durationSec', 'suggestedMusic',
+                         'transitions', 'effects', 'aspectRatio', 'contrast', 'saturation',
+                         'brightness', 'speedMultiplier', 'watermarkText', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidTemplate(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(templateId) &&
+                       isValidTemplate(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'style', 'category', 'durationSec', 'suggestedMusic',
+                         'transitions', 'effects', 'aspectRatio', 'contrast', 'saturation',
+                         'brightness', 'speedMultiplier', 'watermarkText', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(templateId);
+    }
+
+    match /users/{userId}/projects/{projectId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(projectId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(projectId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll([
+                         'userId', 'title', 'subject', 'style', 'prompt', 'aspectRatio',
+                         'qualityPreset', 'aiSummary', 'watermarkText', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'title', 'subject', 'style', 'prompt', 'aspectRatio',
+                         'qualityPreset', 'aiSummary', 'watermarkText', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidProject(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(projectId) &&
+                       isValidProject(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'title', 'subject', 'style', 'prompt', 'aspectRatio',
+                         'qualityPreset', 'aiSummary', 'watermarkText', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(projectId);
+    }
+
+    match /users/{userId}/tickets/{ticketId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(ticketId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(ticketId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().status == 'aberto' &&
+                       incoming().keys().hasAll([
+                         'userId', 'subject', 'category', 'priority', 'description',
+                         'status', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'subject', 'category', 'priority', 'description',
+                         'status', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().createdAt is timestamp && incoming().createdAt <= request.time &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       isValidTicket(incoming());
+
+      allow update: if isOwner(userId) &&
+                       isValidId(ticketId) &&
+                       isValidTicket(incoming()) &&
+                       existing().status != 'resolvido' &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().updatedAt is timestamp && incoming().updatedAt <= request.time &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'subject', 'description', 'priority', 'status', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(ticketId);
+    }
+  }
+}

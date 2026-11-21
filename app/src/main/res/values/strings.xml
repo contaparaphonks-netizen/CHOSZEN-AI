@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Choszen Edit AI</string>
+    <string name="brand_signature">CHOSZEN™©</string>
+    <string name="tab_edit_ai">EDIT AI</string>
+    <string name="tab_studio">Estúdio</string>
+    <string name="tab_templates">Modelos</string>
+    <string name="tab_support">Suporte</string>
+    <string name="sign_in_google">Entrar com Google</string>
+    <string name="sign_out">Sair da conta</string>
+    <string name="error_generic">Ocorreu um erro inesperado. Tente novamente.</string>
+</resources>

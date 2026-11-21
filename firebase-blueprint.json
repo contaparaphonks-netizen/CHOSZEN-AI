@@ -1,0 +1,206 @@
+{
+  "entities": {
+    "EditTemplate": {
+      "title": "EditTemplate",
+      "description": "Modelo de edicao de video criado e salvo pelo usuario.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID do usuario proprietario"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nome do modelo personalizado"
+        },
+        "style": {
+          "type": "string",
+          "description": "Estilo da edicao (ex: Phonk Edit, Velocity Edit)"
+        },
+        "category": {
+          "type": "string",
+          "description": "Categoria (Futebol, Geral, Highlights)"
+        },
+        "durationSec": {
+          "type": "integer",
+          "description": "Duracao sugerida em segundos"
+        },
+        "suggestedMusic": {
+          "type": "string",
+          "description": "Musica ou estilo de batida sugerida"
+        },
+        "transitions": {
+          "type": "string",
+          "description": "Lista de transicoes separadas na colecao"
+        },
+        "effects": {
+          "type": "string",
+          "description": "Lista de efeitos visuais aplicados"
+        },
+        "aspectRatio": {
+          "type": "string",
+          "enum": ["9:16", "1:1", "16:9"]
+        },
+        "contrast": {
+          "type": "number"
+        },
+        "saturation": {
+          "type": "number"
+        },
+        "brightness": {
+          "type": "number"
+        },
+        "speedMultiplier": {
+          "type": "number"
+        },
+        "watermarkText": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de criacao via FieldValue.serverTimestamp()"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data de atualizacao via FieldValue.serverTimestamp()"
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "style",
+        "category",
+        "durationSec",
+        "suggestedMusic",
+        "transitions",
+        "effects",
+        "aspectRatio",
+        "contrast",
+        "saturation",
+        "brightness",
+        "speedMultiplier",
+        "watermarkText",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "EditProject": {
+      "title": "EditProject",
+      "description": "Projeto de edicao com plano gerado pela IA CHOSZEN EDIT AI.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "aspectRatio": {
+          "type": "string",
+          "enum": ["9:16", "1:1", "16:9"]
+        },
+        "qualityPreset": {
+          "type": "string",
+          "enum": ["HD", "Full HD", "2K", "4K"]
+        },
+        "aiSummary": {
+          "type": "string"
+        },
+        "watermarkText": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "subject",
+        "style",
+        "prompt",
+        "aspectRatio",
+        "qualityPreset",
+        "aiSummary",
+        "watermarkText",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SupportTicket": {
+      "title": "SupportTicket",
+      "description": "Ticket de suporte e seguranca aberto pelo usuario.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["baixa", "media", "alta"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["aberto", "em_analise", "resolvido"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "subject",
+        "category",
+        "priority",
+        "description",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/templates/{templateId}": {
+      "schema": { "$ref": "#/entities/EditTemplate" },
+      "description": "Modelos de edicao salvos pelo usuario"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/EditProject" },
+      "description": "Projetos e planos de edicao gerados pela IA"
+    },
+    "/users/{userId}/tickets/{ticketId}": {
+      "schema": { "$ref": "#/entities/SupportTicket" },
+      "description": "Tickets de suporte e seguranca do usuario"
+    }
+  }
+}
